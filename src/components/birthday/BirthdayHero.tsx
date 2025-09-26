@@ -6,7 +6,7 @@ import { Cake } from './Cake';
 import { MusicPlayer } from './MusicPlayer';
 import { LyricsDisplay } from './LyricsDisplay';
 import { BarrageSystem } from './BarrageSystem';
-import { Gift, Sparkles, Music, RotateCcw } from 'lucide-react';
+import { Gift, Sparkles, Music, RotateCcw, Volume2 } from 'lucide-react';
 
 interface BalloonState {
   id: string;
@@ -34,6 +34,7 @@ export const BirthdayHero = () => {
   const [showLyrics, setShowLyrics] = useState(false);
   const [showBarrage, setShowBarrage] = useState(false);
   const [balloons, setBalloons] = useState<BalloonState[]>(initialBalloons);
+  const [balloonsPopped, setBalloonsPopped] = useState(0);
   const [name, setName] = useState('');
 
   const startParty = () => {
@@ -60,21 +61,23 @@ export const BirthdayHero = () => {
   };
 
   const handleBalloonFlyAway = (balloonId: string) => {
-    console.log('Handling balloon fly away:', balloonId); // Debug log
+    console.log('Handling balloon fly away:', balloonId);
     setBalloons(prev => {
       const newBalloons = prev.map(balloon => 
         balloon.id === balloonId 
           ? { ...balloon, isVisible: false }
           : balloon
       );
-      console.log('Updated balloons:', newBalloons); // Debug log
+      console.log('Updated balloons:', newBalloons);
       return newBalloons;
     });
+    setBalloonsPopped(prev => prev + 1);
   };
 
   const resetBalloons = () => {
-    console.log('Resetting balloons'); // Debug log
+    console.log('Resetting balloons');
     setBalloons(initialBalloons.map(balloon => ({ ...balloon, isVisible: true })));
+    setBalloonsPopped(0);
   };
 
   const visibleBalloons = balloons.filter(balloon => balloon.isVisible);
@@ -129,9 +132,26 @@ export const BirthdayHero = () => {
             <p className="text-sm font-semibold gradient-text">
               🎈 剩余气球: {visibleBalloons.length}/6
             </p>
-            <p className="text-xs text-foreground/70 mt-1">
-              点击气球放飞它们！
+            <p className="text-xs text-foreground/70 mt-1 flex items-center">
+              <Volume2 className="h-3 w-3 mr-1" />
+              点击气球听声音！
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* Balloons popped counter */}
+      {balloonsPopped > 0 && (
+        <div className="fixed top-24 left-4 z-40">
+          <div className="bg-party-pink/20 backdrop-blur-md rounded-2xl p-3 border border-party-pink/30 shadow-xl">
+            <p className="text-sm font-semibold text-party-pink">
+              🎊 已放飞: {balloonsPopped} 个气球
+            </p>
+            {balloonsPopped >= 3 && (
+              <p className="text-xs text-party-pink/80 mt-1">
+                🌟 棒极了！继续加油！
+              </p>
+            )}
           </div>
         </div>
       )}
@@ -239,12 +259,13 @@ export const BirthdayHero = () => {
                 <p className="text-party-green font-medium">💬 祝福弹幕</p>
               </div>
               <div className="p-3 bg-party-yellow/20 backdrop-blur-md rounded-xl border border-party-yellow/30">
-                <p className="text-party-yellow font-medium">🎈 互动气球</p>
+                <p className="text-party-yellow font-medium">🎈 声效气球</p>
               </div>
             </div>
             <div className="p-3 bg-party-orange/20 backdrop-blur-md rounded-xl border border-party-orange/30">
-              <p className="text-party-orange font-medium text-sm">
-                💡 小贴士：点击屏幕上的彩色气球可以放飞它们！
+              <p className="text-party-orange font-medium text-sm flex items-center justify-center">
+                <Volume2 className="h-4 w-4 mr-2" />
+                💡 小贴士：点击屏幕上的彩色气球享受音效体验！
               </p>
             </div>
           </div>
@@ -252,8 +273,9 @@ export const BirthdayHero = () => {
 
         {showBarrage && hasVisibleBalloons && (
           <div className="mt-6 p-4 bg-party-orange/20 backdrop-blur-md rounded-2xl border border-party-orange/30">
-            <p className="text-lg text-party-orange font-semibold">
-              🎈 点击气球放飞它们！💬 朋友们的祝福正在飞过屏幕！
+            <p className="text-lg text-party-orange font-semibold flex items-center justify-center">
+              <Volume2 className="h-5 w-5 mr-2" />
+              🎈 点击气球听音效！💬 朋友们的祝福正在飞过屏幕！
             </p>
           </div>
         )}
@@ -261,7 +283,10 @@ export const BirthdayHero = () => {
         {!hasVisibleBalloons && showBarrage && (
           <div className="mt-6 p-4 bg-party-pink/20 backdrop-blur-md rounded-2xl border border-party-pink/30">
             <p className="text-lg text-party-pink font-semibold">
-              🎊 所有气球都飞走了！点击左上角按钮重新放置气球！
+              🎊 所有气球都飞走了！🎵 总共听到了 {balloonsPopped} 个音效！
+            </p>
+            <p className="text-sm text-party-pink/80 mt-2">
+              点击左上角按钮重新放置气球继续玩！
             </p>
           </div>
         )}
