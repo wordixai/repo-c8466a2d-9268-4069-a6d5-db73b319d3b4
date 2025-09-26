@@ -6,7 +6,25 @@ import { Cake } from './Cake';
 import { MusicPlayer } from './MusicPlayer';
 import { LyricsDisplay } from './LyricsDisplay';
 import { BarrageSystem } from './BarrageSystem';
-import { Gift, Sparkles, Music } from 'lucide-react';
+import { Gift, Sparkles, Music, RotateCcw } from 'lucide-react';
+
+interface BalloonState {
+  id: string;
+  color: 'pink' | 'blue' | 'yellow' | 'purple' | 'green' | 'orange';
+  size: 'sm' | 'md' | 'lg';
+  position: { top: string; left: string; right?: string; bottom?: string };
+  animationDelay: string;
+  isVisible: boolean;
+}
+
+const initialBalloons: BalloonState[] = [
+  { id: 'balloon-1', color: 'pink', size: 'lg', position: { top: '20%', left: '10%' }, animationDelay: '0s', isVisible: true },
+  { id: 'balloon-2', color: 'blue', size: 'md', position: { top: '32%', right: '20%' }, animationDelay: '1s', isVisible: true },
+  { id: 'balloon-3', color: 'yellow', size: 'lg', position: { bottom: '40%', left: '20%' }, animationDelay: '2s', isVisible: true },
+  { id: 'balloon-4', color: 'purple', size: 'md', position: { bottom: '20%', right: '10%' }, animationDelay: '0.5s', isVisible: true },
+  { id: 'balloon-5', color: 'green', size: 'sm', position: { top: '50%', left: '33%' }, animationDelay: '1.5s', isVisible: true },
+  { id: 'balloon-6', color: 'orange', size: 'md', position: { top: '33%', right: '33%' }, animationDelay: '2.5s', isVisible: true },
+];
 
 export const BirthdayHero = () => {
   const [isPartyMode, setIsPartyMode] = useState(false);
@@ -15,6 +33,7 @@ export const BirthdayHero = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showLyrics, setShowLyrics] = useState(false);
   const [showBarrage, setShowBarrage] = useState(false);
+  const [balloons, setBalloons] = useState<BalloonState[]>(initialBalloons);
   const [name, setName] = useState('');
 
   const startParty = () => {
@@ -40,16 +59,71 @@ export const BirthdayHero = () => {
     setShowLyrics(false);
   };
 
+  const handleBalloonFlyAway = (balloonId: string) => {
+    setBalloons(prev => 
+      prev.map(balloon => 
+        balloon.id === balloonId 
+          ? { ...balloon, isVisible: false }
+          : balloon
+      )
+    );
+  };
+
+  const resetBalloons = () => {
+    setBalloons(initialBalloons);
+  };
+
+  const visibleBalloons = balloons.filter(balloon => balloon.isVisible);
+  const hasVisibleBalloons = visibleBalloons.length > 0;
+
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-4">
       {/* Background balloons */}
-      <div className="absolute inset-0 pointer-events-none">
-        <Balloon color="pink" size="lg" className="absolute top-20 left-10 animate-float" style={{animationDelay: '0s'}} />
-        <Balloon color="blue" size="md" className="absolute top-32 right-20 animate-float" style={{animationDelay: '1s'}} />
-        <Balloon color="yellow" size="lg" className="absolute bottom-40 left-20 animate-float" style={{animationDelay: '2s'}} />
-        <Balloon color="purple" size="md" className="absolute bottom-20 right-10 animate-float" style={{animationDelay: '0.5s'}} />
-        <Balloon color="green" size="sm" className="absolute top-1/2 left-1/3 animate-float" style={{animationDelay: '1.5s'}} />
-        <Balloon color="orange" size="md" className="absolute top-1/3 right-1/3 animate-float" style={{animationDelay: '2.5s'}} />
+      <div className="absolute inset-0 pointer-events-auto">
+        {balloons.map((balloon) => (
+          balloon.isVisible && (
+            <Balloon 
+              key={balloon.id}
+              color={balloon.color} 
+              size={balloon.size} 
+              className="absolute animate-float" 
+              style={{
+                ...balloon.position,
+                animationDelay: balloon.animationDelay
+              }}
+              onFlyAway={() => handleBalloonFlyAway(balloon.id)}
+            />
+          )
+        ))}
+      </div>
+
+      {/* Balloon reset button */}
+      {!hasVisibleBalloons && (
+        <div className="fixed top-4 left-4 z-50">
+          <Button
+            onClick={resetBalloons}
+            className="party-button rounded-full shadow-2xl hover:scale-105 transition-transform"
+            size="lg"
+          >
+            <RotateCcw className="h-6 w-6 mr-2" />
+            重新放置气球
+            <Sparkles className="h-6 w-6 ml-2" />
+          </Button>
+        </div>
+      )}
+
+      {/* Balloon counter */}
+      <div className="fixed top-20 left-4 z-40">
+        <div className="bg-white/20 backdrop-blur-md rounded-2xl p-3 border border-white/30 shadow-xl">
+          <p className="text-sm font-semibold gradient-text">
+            🎈 剩余气球: {visibleBalloons.length}/6
+          </p>
+          {hasVisibleBalloons && (
+            <p className="text-xs text-foreground/70 mt-1">
+              点击气球放飞它们！
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Confetti */}
@@ -144,7 +218,7 @@ export const BirthdayHero = () => {
                 🎵 点击"开始庆祝"解锁全部功能！🎵
               </p>
             </div>
-            <div className="grid md:grid-cols-3 gap-4 text-sm">
+            <div className="grid md:grid-cols-4 gap-4 text-sm">
               <div className="p-3 bg-party-blue/20 backdrop-blur-md rounded-xl border border-party-blue/30">
                 <p className="text-party-blue font-medium">🎶 生日快乐歌</p>
               </div>
@@ -154,14 +228,30 @@ export const BirthdayHero = () => {
               <div className="p-3 bg-party-green/20 backdrop-blur-md rounded-xl border border-party-green/30">
                 <p className="text-party-green font-medium">💬 祝福弹幕</p>
               </div>
+              <div className="p-3 bg-party-yellow/20 backdrop-blur-md rounded-xl border border-party-yellow/30">
+                <p className="text-party-yellow font-medium">🎈 互动气球</p>
+              </div>
+            </div>
+            <div className="p-3 bg-party-orange/20 backdrop-blur-md rounded-xl border border-party-orange/30">
+              <p className="text-party-orange font-medium text-sm">
+                💡 小贴士：点击屏幕上的气球可以放飞它们！
+              </p>
             </div>
           </div>
         )}
 
-        {showBarrage && (
+        {showBarrage && hasVisibleBalloons && (
           <div className="mt-6 p-4 bg-party-orange/20 backdrop-blur-md rounded-2xl border border-party-orange/30">
             <p className="text-lg text-party-orange font-semibold">
-              💬 朋友们的祝福正在飞过屏幕！点击左下角发送你的祝福弹幕！
+              🎈 点击气球放飞它们！💬 朋友们的祝福正在飞过屏幕！
+            </p>
+          </div>
+        )}
+
+        {!hasVisibleBalloons && showBarrage && (
+          <div className="mt-6 p-4 bg-party-pink/20 backdrop-blur-md rounded-2xl border border-party-pink/30">
+            <p className="text-lg text-party-pink font-semibold">
+              🎊 所有气球都飞走了！点击左上角按钮重新放置气球！
             </p>
           </div>
         )}
