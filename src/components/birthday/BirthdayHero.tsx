@@ -5,6 +5,7 @@ import { Confetti } from './Confetti';
 import { Cake } from './Cake';
 import { MusicPlayer } from './MusicPlayer';
 import { LyricsDisplay } from './LyricsDisplay';
+import { BarrageSystem } from './BarrageSystem';
 import { Gift, Sparkles, Music } from 'lucide-react';
 
 export const BirthdayHero = () => {
@@ -13,12 +14,14 @@ export const BirthdayHero = () => {
   const [showMusicPlayer, setShowMusicPlayer] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showLyrics, setShowLyrics] = useState(false);
+  const [showBarrage, setShowBarrage] = useState(false);
   const [name, setName] = useState('');
 
   const startParty = () => {
     setIsPartyMode(true);
     setShowConfetti(true);
     setShowMusicPlayer(true);
+    setShowBarrage(true);
     // Stop confetti after 5 seconds
     setTimeout(() => setShowConfetti(false), 5000);
   };
@@ -51,6 +54,9 @@ export const BirthdayHero = () => {
 
       {/* Confetti */}
       {showConfetti && <Confetti />}
+
+      {/* Barrage System */}
+      <BarrageSystem isActive={showBarrage} />
 
       {/* Lyrics Display */}
       {showLyrics && (
@@ -130,19 +136,32 @@ export const BirthdayHero = () => {
           </div>
         </div>
 
-        {/* Music and lyrics info */}
+        {/* Feature info */}
         {!showMusicPlayer && (
-          <div className="mt-6 p-4 bg-party-pink/20 backdrop-blur-md rounded-2xl border border-party-pink/30">
-            <p className="text-lg text-party-pink font-semibold">
-              🎵 点击"开始庆祝"按钮播放生日快乐歌和字幕！🎵
-            </p>
+          <div className="mt-6 space-y-3">
+            <div className="p-4 bg-party-pink/20 backdrop-blur-md rounded-2xl border border-party-pink/30">
+              <p className="text-lg text-party-pink font-semibold">
+                🎵 点击"开始庆祝"解锁全部功能！🎵
+              </p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-4 text-sm">
+              <div className="p-3 bg-party-blue/20 backdrop-blur-md rounded-xl border border-party-blue/30">
+                <p className="text-party-blue font-medium">🎶 生日快乐歌</p>
+              </div>
+              <div className="p-3 bg-party-purple/20 backdrop-blur-md rounded-xl border border-party-purple/30">
+                <p className="text-party-purple font-medium">📺 同步字幕</p>
+              </div>
+              <div className="p-3 bg-party-green/20 backdrop-blur-md rounded-xl border border-party-green/30">
+                <p className="text-party-green font-medium">💬 祝福弹幕</p>
+              </div>
+            </div>
           </div>
         )}
 
-        {showMusicPlayer && !isPlaying && (
-          <div className="mt-6 p-4 bg-party-blue/20 backdrop-blur-md rounded-2xl border border-party-blue/30">
-            <p className="text-lg text-party-blue font-semibold">
-              🎶 点击播放按钮开始音乐和滚动字幕！🎶
+        {showBarrage && (
+          <div className="mt-6 p-4 bg-party-orange/20 backdrop-blur-md rounded-2xl border border-party-orange/30">
+            <p className="text-lg text-party-orange font-semibold">
+              💬 朋友们的祝福正在飞过屏幕！点击左下角发送你的祝福弹幕！
             </p>
           </div>
         )}
