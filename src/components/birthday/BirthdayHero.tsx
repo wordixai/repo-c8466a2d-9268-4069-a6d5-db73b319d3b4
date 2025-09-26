@@ -38,15 +38,27 @@ export const BirthdayHero = () => {
   const [name, setName] = useState('');
 
   const startParty = () => {
-    setIsPartyMode(true);
-    setShowConfetti(true);
-    setShowMusicPlayer(true);
-    setShowBarrage(true);
-    // Stop confetti after 5 seconds
-    setTimeout(() => setShowConfetti(false), 5000);
+    console.log('Starting party!'); // Debug log
+    try {
+      setIsPartyMode(true);
+      setShowConfetti(true);
+      setShowMusicPlayer(true);
+      setShowBarrage(true);
+      
+      console.log('Party state updated successfully'); // Debug log
+      
+      // Stop confetti after 5 seconds
+      setTimeout(() => {
+        setShowConfetti(false);
+        console.log('Confetti stopped'); // Debug log
+      }, 5000);
+    } catch (error) {
+      console.error('Error starting party:', error);
+    }
   };
 
   const handlePlayStateChange = (playing: boolean) => {
+    console.log('Play state changed:', playing); // Debug log
     setIsPlaying(playing);
     setShowLyrics(playing);
   };
@@ -85,8 +97,14 @@ export const BirthdayHero = () => {
 
   // Debug effect
   useEffect(() => {
-    console.log('Visible balloons count:', visibleBalloons.length);
-  }, [visibleBalloons.length]);
+    console.log('Component state:', {
+      isPartyMode,
+      showConfetti,
+      showMusicPlayer,
+      showBarrage,
+      visibleBalloons: visibleBalloons.length
+    });
+  }, [isPartyMode, showConfetti, showMusicPlayer, showBarrage, visibleBalloons.length]);
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-4">
@@ -160,7 +178,7 @@ export const BirthdayHero = () => {
       {showConfetti && <Confetti />}
 
       {/* Barrage System */}
-      <BarrageSystem isActive={showBarrage} />
+      {showBarrage && <BarrageSystem isActive={showBarrage} />}
 
       {/* Lyrics Display */}
       {showLyrics && (
@@ -216,15 +234,31 @@ export const BirthdayHero = () => {
         </div>
 
         {/* Party button */}
-        <Button
-          onClick={startParty}
-          size="lg"
-          className="party-button text-2xl px-12 py-6 rounded-full hover:scale-105 transform transition-all duration-300 shadow-2xl"
-        >
-          <Gift className="mr-3 h-8 w-8" />
-          开始庆祝！🎵
-          <Music className="ml-3 h-8 w-8" />
-        </Button>
+        <div className="flex justify-center">
+          <Button
+            onClick={startParty}
+            disabled={isPartyMode}
+            size="lg"
+            className={cn(
+              "party-button text-2xl px-12 py-6 rounded-full hover:scale-105 transform transition-all duration-300 shadow-2xl",
+              isPartyMode && "opacity-75 cursor-not-allowed"
+            )}
+          >
+            <Gift className="mr-3 h-8 w-8" />
+            {isPartyMode ? "🎉 庆祝中..." : "开始庆祝！🎵"}
+            <Music className="ml-3 h-8 w-8" />
+          </Button>
+        </div>
+
+        {/* Debug info */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mt-4 p-3 bg-black/20 backdrop-blur-md rounded-xl border border-white/20 text-xs text-white/70">
+            <p>Debug: Party Mode: {isPartyMode.toString()}</p>
+            <p>Debug: Music Player: {showMusicPlayer.toString()}</p>
+            <p>Debug: Barrage: {showBarrage.toString()}</p>
+            <p>Debug: Confetti: {showConfetti.toString()}</p>
+          </div>
+        )}
 
         {/* Birthday message */}
         <div className="mt-8 p-6 bg-white/20 backdrop-blur-md rounded-3xl border border-white/30 shadow-xl">
