@@ -4,12 +4,15 @@ import { Balloon } from './Balloon';
 import { Confetti } from './Confetti';
 import { Cake } from './Cake';
 import { MusicPlayer } from './MusicPlayer';
+import { LyricsDisplay } from './LyricsDisplay';
 import { Gift, Sparkles, Music } from 'lucide-react';
 
 export const BirthdayHero = () => {
   const [isPartyMode, setIsPartyMode] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showMusicPlayer, setShowMusicPlayer] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [showLyrics, setShowLyrics] = useState(false);
   const [name, setName] = useState('');
 
   const startParty = () => {
@@ -18,6 +21,20 @@ export const BirthdayHero = () => {
     setShowMusicPlayer(true);
     // Stop confetti after 5 seconds
     setTimeout(() => setShowConfetti(false), 5000);
+  };
+
+  const handlePlayStateChange = (playing: boolean) => {
+    setIsPlaying(playing);
+    setShowLyrics(playing);
+  };
+
+  const handleLyricsEnd = () => {
+    setShowLyrics(false);
+  };
+
+  const handleSongEnd = () => {
+    setIsPlaying(false);
+    setShowLyrics(false);
   };
 
   return (
@@ -35,10 +52,22 @@ export const BirthdayHero = () => {
       {/* Confetti */}
       {showConfetti && <Confetti />}
 
+      {/* Lyrics Display */}
+      {showLyrics && (
+        <LyricsDisplay 
+          isPlaying={isPlaying} 
+          onLyricsEnd={handleLyricsEnd}
+        />
+      )}
+
       {/* Music Player - Fixed position */}
       {showMusicPlayer && (
         <div className="fixed top-4 right-4 z-50 animate-bounce-custom">
-          <MusicPlayer autoPlay={true} />
+          <MusicPlayer 
+            autoPlay={true} 
+            onPlayStateChange={handlePlayStateChange}
+            onSongEnd={handleSongEnd}
+          />
         </div>
       )}
 
@@ -101,11 +130,19 @@ export const BirthdayHero = () => {
           </div>
         </div>
 
-        {/* Music prompt */}
+        {/* Music and lyrics info */}
         {!showMusicPlayer && (
           <div className="mt-6 p-4 bg-party-pink/20 backdrop-blur-md rounded-2xl border border-party-pink/30">
             <p className="text-lg text-party-pink font-semibold">
-              🎵 点击"开始庆祝"按钮播放生日快乐歌！🎵
+              🎵 点击"开始庆祝"按钮播放生日快乐歌和字幕！🎵
+            </p>
+          </div>
+        )}
+
+        {showMusicPlayer && !isPlaying && (
+          <div className="mt-6 p-4 bg-party-blue/20 backdrop-blur-md rounded-2xl border border-party-blue/30">
+            <p className="text-lg text-party-blue font-semibold">
+              🎶 点击播放按钮开始音乐和滚动字幕！🎶
             </p>
           </div>
         )}
