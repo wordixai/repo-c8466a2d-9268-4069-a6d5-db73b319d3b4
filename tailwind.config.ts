@@ -61,6 +61,14 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				party: {
+					pink: 'hsl(var(--party-pink))',
+					purple: 'hsl(var(--party-purple))',
+					orange: 'hsl(var(--party-orange))',
+					yellow: 'hsl(var(--party-yellow))',
+					blue: 'hsl(var(--party-blue))',
+					green: 'hsl(var(--party-green))'
 				}
 			},
 			borderRadius: {
