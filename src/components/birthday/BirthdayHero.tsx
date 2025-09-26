@@ -6,6 +6,7 @@ import { Cake } from './Cake';
 import { MusicPlayer } from './MusicPlayer';
 import { LyricsDisplay } from './LyricsDisplay';
 import { BarrageSystem } from './BarrageSystem';
+import { cn } from '@/lib/utils';
 import { Gift, Sparkles, Music, RotateCcw, Volume2 } from 'lucide-react';
 
 interface BalloonState {
@@ -38,19 +39,19 @@ export const BirthdayHero = () => {
   const [name, setName] = useState('');
 
   const startParty = () => {
-    console.log('Starting party!'); // Debug log
+    console.log('Starting party!');
     try {
       setIsPartyMode(true);
       setShowConfetti(true);
       setShowMusicPlayer(true);
       setShowBarrage(true);
       
-      console.log('Party state updated successfully'); // Debug log
+      console.log('Party state updated successfully');
       
       // Stop confetti after 5 seconds
       setTimeout(() => {
         setShowConfetti(false);
-        console.log('Confetti stopped'); // Debug log
+        console.log('Confetti stopped');
       }, 5000);
     } catch (error) {
       console.error('Error starting party:', error);
@@ -58,7 +59,7 @@ export const BirthdayHero = () => {
   };
 
   const handlePlayStateChange = (playing: boolean) => {
-    console.log('Play state changed:', playing); // Debug log
+    console.log('Play state changed:', playing);
     setIsPlaying(playing);
     setShowLyrics(playing);
   };
@@ -239,26 +240,15 @@ export const BirthdayHero = () => {
             onClick={startParty}
             disabled={isPartyMode}
             size="lg"
-            className={cn(
-              "party-button text-2xl px-12 py-6 rounded-full hover:scale-105 transform transition-all duration-300 shadow-2xl",
-              isPartyMode && "opacity-75 cursor-not-allowed"
-            )}
+            className={`party-button text-2xl px-12 py-6 rounded-full hover:scale-105 transform transition-all duration-300 shadow-2xl ${
+              isPartyMode ? 'opacity-75 cursor-not-allowed' : ''
+            }`}
           >
             <Gift className="mr-3 h-8 w-8" />
             {isPartyMode ? "🎉 庆祝中..." : "开始庆祝！🎵"}
             <Music className="ml-3 h-8 w-8" />
           </Button>
         </div>
-
-        {/* Debug info */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mt-4 p-3 bg-black/20 backdrop-blur-md rounded-xl border border-white/20 text-xs text-white/70">
-            <p>Debug: Party Mode: {isPartyMode.toString()}</p>
-            <p>Debug: Music Player: {showMusicPlayer.toString()}</p>
-            <p>Debug: Barrage: {showBarrage.toString()}</p>
-            <p>Debug: Confetti: {showConfetti.toString()}</p>
-          </div>
-        )}
 
         {/* Birthday message */}
         <div className="mt-8 p-6 bg-white/20 backdrop-blur-md rounded-3xl border border-white/30 shadow-xl">
