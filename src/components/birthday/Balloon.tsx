@@ -43,12 +43,10 @@ export const Balloon = ({ color, size = 'md', className, style, onFlyAway }: Bal
     try {
       const audioContext = audioContextRef.current;
       
-      // Resume audio context if suspended
       if (audioContext.state === 'suspended') {
         audioContext.resume();
       }
 
-      // Create a pop sound effect
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
       const filterNode = audioContext.createBiquadFilter();
@@ -57,16 +55,13 @@ export const Balloon = ({ color, size = 'md', className, style, onFlyAway }: Bal
       filterNode.connect(gainNode);
       gainNode.connect(audioContext.destination);
       
-      // Pop sound: quick frequency sweep
       oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
       oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.1);
       
-      // Filter for a more balloon-like sound
       filterNode.type = 'lowpass';
       filterNode.frequency.setValueAtTime(1000, audioContext.currentTime);
       filterNode.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.15);
       
-      // Volume envelope
       gainNode.gain.setValueAtTime(0, audioContext.currentTime);
       gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01);
       gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
@@ -87,21 +82,18 @@ export const Balloon = ({ color, size = 'md', className, style, onFlyAway }: Bal
     try {
       const audioContext = audioContextRef.current;
       
-      // Resume audio context if suspended
       if (audioContext.state === 'suspended') {
         audioContext.resume();
       }
 
-      // Create whoosh sound with noise
-      const bufferSize = audioContext.sampleRate * 0.8; // 0.8 seconds
+      const bufferSize = audioContext.sampleRate * 1.2;
       const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
       const data = buffer.getChannelData(0);
       
-      // Generate whoosh noise
       for (let i = 0; i < bufferSize; i++) {
         const t = i / bufferSize;
-        const envelope = Math.sin(Math.PI * t) * Math.exp(-t * 3);
-        data[i] = (Math.random() * 2 - 1) * envelope * 0.3;
+        const envelope = Math.sin(Math.PI * t) * Math.exp(-t * 2);
+        data[i] = (Math.random() * 2 - 1) * envelope * 0.4;
       }
       
       const bufferSource = audioContext.createBufferSource();
@@ -113,13 +105,12 @@ export const Balloon = ({ color, size = 'md', className, style, onFlyAway }: Bal
       filterNode.connect(gainNode);
       gainNode.connect(audioContext.destination);
       
-      // High-pass filter for whoosh effect
       filterNode.type = 'highpass';
-      filterNode.frequency.setValueAtTime(200, audioContext.currentTime);
-      filterNode.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.8);
+      filterNode.frequency.setValueAtTime(300, audioContext.currentTime);
+      filterNode.frequency.exponentialRampToValueAtTime(1000, audioContext.currentTime + 1.2);
       
-      gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.8);
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 1.2);
       
       bufferSource.start(audioContext.currentTime);
       
@@ -135,12 +126,10 @@ export const Balloon = ({ color, size = 'md', className, style, onFlyAway }: Bal
     try {
       const audioContext = audioContextRef.current;
       
-      // Resume audio context if suspended
       if (audioContext.state === 'suspended') {
         audioContext.resume();
       }
 
-      // Create multiple sparkle tones
       const frequencies = [800, 1000, 1200, 1500, 1800];
       
       frequencies.forEach((freq, index) => {
@@ -191,19 +180,18 @@ export const Balloon = ({ color, size = 'md', className, style, onFlyAway }: Bal
       setIsFlying(true);
       playWhooshSound();
       console.log('Starting fly animation with whoosh sound');
-    }, 200);
+    }, 400);
     
     // Call callback after animation completes
     setTimeout(() => {
       console.log('Animation complete, calling onFlyAway');
       onFlyAway?.();
-    }, 2500);
+    }, 3400); // 3s animation + 400ms delay
   };
 
   const handleMouseEnter = () => {
     if (isFlying || isClicked) return;
     
-    // Play subtle hover sound
     if (!audioContextRef.current) return;
 
     try {
@@ -235,16 +223,13 @@ export const Balloon = ({ color, size = 'md', className, style, onFlyAway }: Bal
     }
   };
 
-  if (isFlying) {
-    return null;
-  }
-
   return (
     <div 
       className={cn(
         "relative cursor-pointer group transition-all duration-300 select-none",
-        isClicked && "animate-pulse",
-        !isFlying && "hover:scale-110 hover:-translate-y-2 active:scale-95",
+        isClicked && !isFlying && "animate-bounce-up",
+        isFlying && "animate-fly-away",
+        !isFlying && !isClicked && "hover:scale-110 hover:-translate-y-2 active:scale-95",
         className
       )} 
       style={style}
@@ -259,7 +244,6 @@ export const Balloon = ({ color, size = 'md', className, style, onFlyAway }: Bal
           colorClasses[color],
           sizeClasses[size],
           "before:content-[''] before:absolute before:top-1 before:left-1/4 before:w-1/3 before:h-1/3 before:bg-white/30 before:rounded-full before:blur-sm",
-          isClicked && "animate-bounce scale-110",
           !isFlying && "group-hover:shadow-xl group-hover:shadow-current/30"
         )}
       />
@@ -267,7 +251,7 @@ export const Balloon = ({ color, size = 'md', className, style, onFlyAway }: Bal
       {/* String */}
       <div className={cn(
         "absolute left-1/2 top-full w-px bg-gray-600 transform -translate-x-1/2 transition-all duration-300 select-none",
-        isClicked ? "h-32 opacity-50" : "h-20",
+        isFlying ? "animate-string-follow" : "h-20",
         !isFlying && "group-hover:h-24"
       )} />
       
@@ -285,12 +269,11 @@ export const Balloon = ({ color, size = 'md', className, style, onFlyAway }: Bal
           {[...Array(8)].map((_, i) => (
             <div
               key={i}
-              className="absolute text-yellow-300 animate-ping"
+              className="absolute text-yellow-300 animate-sparkle-fly"
               style={{
                 left: `${20 + Math.random() * 60}%`,
                 top: `${20 + Math.random() * 60}%`,
                 animationDelay: `${i * 0.1}s`,
-                animationDuration: '0.6s',
                 fontSize: size === 'lg' ? '16px' : size === 'md' ? '14px' : '12px'
               }}
             >
@@ -298,8 +281,9 @@ export const Balloon = ({ color, size = 'md', className, style, onFlyAway }: Bal
             </div>
           ))}
           {/* Sound wave effect */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 border-2 border-white/50 rounded-full animate-ping" />
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 border border-white/30 rounded-full animate-ping" style={{animationDelay: '0.1s'}} />
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 border-2 border-white/50 rounded-full animate-sound-wave" />
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 border border-white/30 rounded-full animate-sound-wave" style={{animationDelay: '0.2s'}} />
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 border border-white/20 rounded-full animate-sound-wave" style={{animationDelay: '0.4s'}} />
         </div>
       )}
 
@@ -314,10 +298,19 @@ export const Balloon = ({ color, size = 'md', className, style, onFlyAway }: Bal
       )}
 
       {/* Click feedback */}
-      {isClicked && (
+      {isClicked && !isFlying && (
         <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 pointer-events-none select-none z-10">
           <div className="bg-party-pink/90 text-white text-sm px-3 py-1 rounded-lg animate-bounce">
-            🚀 飞走啦！🎵
+            🚀 准备起飞！
+          </div>
+        </div>
+      )}
+
+      {/* Flying feedback */}
+      {isFlying && (
+        <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 pointer-events-none select-none z-10">
+          <div className="bg-party-blue/90 text-white text-sm px-3 py-1 rounded-lg animate-pulse">
+            🌤️ 飞向天空！
           </div>
         </div>
       )}
