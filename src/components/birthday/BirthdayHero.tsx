@@ -3,16 +3,19 @@ import { Button } from '@/components/ui/button';
 import { Balloon } from './Balloon';
 import { Confetti } from './Confetti';
 import { Cake } from './Cake';
+import { MusicPlayer } from './MusicPlayer';
 import { Gift, Sparkles, Music } from 'lucide-react';
 
 export const BirthdayHero = () => {
   const [isPartyMode, setIsPartyMode] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [showMusicPlayer, setShowMusicPlayer] = useState(false);
   const [name, setName] = useState('');
 
   const startParty = () => {
     setIsPartyMode(true);
     setShowConfetti(true);
+    setShowMusicPlayer(true);
     // Stop confetti after 5 seconds
     setTimeout(() => setShowConfetti(false), 5000);
   };
@@ -32,6 +35,13 @@ export const BirthdayHero = () => {
       {/* Confetti */}
       {showConfetti && <Confetti />}
 
+      {/* Music Player - Fixed position */}
+      {showMusicPlayer && (
+        <div className="fixed top-4 right-4 z-50 animate-bounce-custom">
+          <MusicPlayer autoPlay={true} />
+        </div>
+      )}
+
       {/* Main content */}
       <div className="text-center space-y-8 z-10 max-w-4xl mx-auto">
         {/* Sparkles decoration */}
@@ -49,7 +59,7 @@ export const BirthdayHero = () => {
         <div className="space-y-4">
           <input
             type="text"
-            placeholder="Enter the birthday person's name..."
+            placeholder="输入生日人的名字..."
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="px-6 py-3 text-xl rounded-full border-2 border-party-pink text-center bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-4 focus:ring-party-pink/50 focus:border-party-purple transition-all"
@@ -73,14 +83,14 @@ export const BirthdayHero = () => {
           className="party-button text-2xl px-12 py-6 rounded-full hover:scale-105 transform transition-all duration-300 shadow-2xl"
         >
           <Gift className="mr-3 h-8 w-8" />
-          Start the Celebration!
+          开始庆祝！🎵
           <Music className="ml-3 h-8 w-8" />
         </Button>
 
         {/* Birthday message */}
         <div className="mt-8 p-6 bg-white/20 backdrop-blur-md rounded-3xl border border-white/30 shadow-xl">
           <p className="text-xl md:text-2xl text-foreground/80 leading-relaxed">
-            🌟 May your special day be filled with happiness, laughter, and all your favorite things! 🌟
+            🌟 愿你的特别日子充满快乐、欢声笑语和所有你喜欢的事物！🌟
           </p>
           <div className="flex justify-center space-x-4 mt-4 text-3xl">
             <span className="animate-bounce-custom" style={{animationDelay: '0s'}}>🎂</span>
@@ -90,6 +100,15 @@ export const BirthdayHero = () => {
             <span className="animate-bounce-custom" style={{animationDelay: '0.8s'}}>✨</span>
           </div>
         </div>
+
+        {/* Music prompt */}
+        {!showMusicPlayer && (
+          <div className="mt-6 p-4 bg-party-pink/20 backdrop-blur-md rounded-2xl border border-party-pink/30">
+            <p className="text-lg text-party-pink font-semibold">
+              🎵 点击"开始庆祝"按钮播放生日快乐歌！🎵
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Bottom decoration */}
