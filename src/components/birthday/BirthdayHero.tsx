@@ -39,27 +39,31 @@ export const BirthdayHero = () => {
   const [name, setName] = useState('');
 
   const startParty = () => {
-    console.log('Starting party!');
+    console.log('🎉 START PARTY CLICKED!');
+    alert('开始庆祝按钮被点击了！'); // Immediate feedback
+    
     try {
+      console.log('Setting party states...');
       setIsPartyMode(true);
       setShowConfetti(true);
       setShowMusicPlayer(true);
       setShowBarrage(true);
       
-      console.log('Party state updated successfully');
+      console.log('✅ All states set successfully');
       
       // Stop confetti after 5 seconds
       setTimeout(() => {
         setShowConfetti(false);
-        console.log('Confetti stopped');
+        console.log('Confetti stopped after 5 seconds');
       }, 5000);
     } catch (error) {
-      console.error('Error starting party:', error);
+      console.error('❌ Error starting party:', error);
+      alert('启动庆祝时出错: ' + error);
     }
   };
 
   const handlePlayStateChange = (playing: boolean) => {
-    console.log('Play state changed:', playing);
+    console.log('🎵 Play state changed:', playing);
     setIsPlaying(playing);
     setShowLyrics(playing);
   };
@@ -74,21 +78,20 @@ export const BirthdayHero = () => {
   };
 
   const handleBalloonFlyAway = (balloonId: string) => {
-    console.log('Handling balloon fly away:', balloonId);
+    console.log('🎈 Balloon flying away:', balloonId);
     setBalloons(prev => {
       const newBalloons = prev.map(balloon => 
         balloon.id === balloonId 
           ? { ...balloon, isVisible: false }
           : balloon
       );
-      console.log('Updated balloons:', newBalloons);
       return newBalloons;
     });
     setBalloonsPopped(prev => prev + 1);
   };
 
   const resetBalloons = () => {
-    console.log('Resetting balloons');
+    console.log('🔄 Resetting balloons');
     setBalloons(initialBalloons.map(balloon => ({ ...balloon, isVisible: true })));
     setBalloonsPopped(0);
   };
@@ -96,19 +99,33 @@ export const BirthdayHero = () => {
   const visibleBalloons = balloons.filter(balloon => balloon.isVisible);
   const hasVisibleBalloons = visibleBalloons.length > 0;
 
-  // Debug effect
+  // Debug effect to monitor all state changes
   useEffect(() => {
-    console.log('Component state:', {
+    console.log('🔍 State Update:', {
       isPartyMode,
       showConfetti,
       showMusicPlayer,
       showBarrage,
+      showLyrics,
+      isPlaying,
       visibleBalloons: visibleBalloons.length
     });
-  }, [isPartyMode, showConfetti, showMusicPlayer, showBarrage, visibleBalloons.length]);
+  }, [isPartyMode, showConfetti, showMusicPlayer, showBarrage, showLyrics, isPlaying, visibleBalloons.length]);
+
+  // Force re-render test
+  const [renderCount, setRenderCount] = useState(0);
+  useEffect(() => {
+    setRenderCount(prev => prev + 1);
+  }, [isPartyMode, showConfetti, showMusicPlayer, showBarrage]);
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-4">
+      {/* Debug Panel - Always visible */}
+      <div className="fixed top-0 left-0 right-0 z-[100] bg-black/80 text-white p-2 text-xs">
+        <div>🔍 Debug Info - Render: {renderCount}</div>
+        <div>Party Mode: {isPartyMode ? '✅' : '❌'} | Confetti: {showConfetti ? '✅' : '❌'} | Music: {showMusicPlayer ? '✅' : '❌'} | Barrage: {showBarrage ? '✅' : '❌'}</div>
+      </div>
+
       {/* Background balloons */}
       <div className="absolute inset-0 z-20">
         {balloons.map((balloon) => (
@@ -129,9 +146,51 @@ export const BirthdayHero = () => {
         ))}
       </div>
 
+      {/* TEST: Always show confetti for testing */}
+      {(showConfetti || isPartyMode) && (
+        <div className="fixed inset-0 z-30">
+          <Confetti />
+          <div className="fixed top-20 left-4 bg-green-500 text-white p-2 rounded">
+            🎊 CONFETTI ACTIVE!
+          </div>
+        </div>
+      )}
+
+      {/* TEST: Always show barrage for testing */}
+      {(showBarrage || isPartyMode) && (
+        <div className="fixed inset-0 z-25">
+          <BarrageSystem isActive={true} />
+          <div className="fixed top-32 left-4 bg-blue-500 text-white p-2 rounded">
+            💬 BARRAGE ACTIVE!
+          </div>
+        </div>
+      )}
+
+      {/* TEST: Always show music player for testing */}
+      {(showMusicPlayer || isPartyMode) && (
+        <div className="fixed top-4 right-4 z-50">
+          <MusicPlayer 
+            autoPlay={false} 
+            onPlayStateChange={handlePlayStateChange}
+            onSongEnd={handleSongEnd}
+          />
+          <div className="absolute -bottom-10 right-0 bg-purple-500 text-white p-1 rounded text-xs">
+            🎵 MUSIC ACTIVE!
+          </div>
+        </div>
+      )}
+
+      {/* Lyrics Display */}
+      {showLyrics && (
+        <LyricsDisplay 
+          isPlaying={isPlaying} 
+          onLyricsEnd={handleLyricsEnd}
+        />
+      )}
+
       {/* Balloon reset button */}
       {!hasVisibleBalloons && (
-        <div className="fixed top-4 left-4 z-50">
+        <div className="fixed top-16 left-4 z-50">
           <Button
             onClick={resetBalloons}
             className="party-button rounded-full shadow-2xl hover:scale-105 transition-transform"
@@ -146,7 +205,7 @@ export const BirthdayHero = () => {
 
       {/* Balloon counter */}
       {hasVisibleBalloons && (
-        <div className="fixed top-4 left-4 z-40">
+        <div className="fixed top-16 left-4 z-40">
           <div className="bg-white/20 backdrop-blur-md rounded-2xl p-3 border border-white/30 shadow-xl">
             <p className="text-sm font-semibold gradient-text">
               🎈 剩余气球: {visibleBalloons.length}/6
@@ -159,55 +218,10 @@ export const BirthdayHero = () => {
         </div>
       )}
 
-      {/* Balloons popped counter */}
-      {balloonsPopped > 0 && (
-        <div className="fixed top-24 left-4 z-40">
-          <div className="bg-party-pink/20 backdrop-blur-md rounded-2xl p-3 border border-party-pink/30 shadow-xl">
-            <p className="text-sm font-semibold text-party-pink">
-              🎊 已放飞: {balloonsPopped} 个气球
-            </p>
-            {balloonsPopped >= 3 && (
-              <p className="text-xs text-party-pink/80 mt-1">
-                🌟 棒极了！继续加油！
-              </p>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Confetti */}
-      {showConfetti && <Confetti />}
-
-      {/* Barrage System */}
-      {showBarrage && <BarrageSystem isActive={showBarrage} />}
-
-      {/* Lyrics Display */}
-      {showLyrics && (
-        <LyricsDisplay 
-          isPlaying={isPlaying} 
-          onLyricsEnd={handleLyricsEnd}
-        />
-      )}
-
-      {/* Music Player - Fixed position */}
-      {showMusicPlayer && (
-        <div className="fixed top-4 right-4 z-50 animate-bounce-custom">
-          <MusicPlayer 
-            autoPlay={true} 
-            onPlayStateChange={handlePlayStateChange}
-            onSongEnd={handleSongEnd}
-          />
-        </div>
-      )}
-
       {/* Main content */}
-      <div className="text-center space-y-8 z-10 max-w-4xl mx-auto">
+      <div className="text-center space-y-8 z-10 max-w-4xl mx-auto mt-16">
         {/* Sparkles decoration */}
         <div className="relative">
-          <Sparkles className="absolute -top-4 -left-4 text-party-yellow animate-sparkle" style={{animationDelay: '0s'}} />
-          <Sparkles className="absolute -top-2 -right-6 text-party-pink animate-sparkle" style={{animationDelay: '0.5s'}} />
-          <Sparkles className="absolute -bottom-4 left-8 text-party-blue animate-sparkle" style={{animationDelay: '1s'}} />
-          
           <h1 className="text-6xl md:text-8xl font-bold gradient-text mb-4 animate-bounce-custom">
             🎉 Happy Birthday! 🎂
           </h1>
@@ -234,86 +248,68 @@ export const BirthdayHero = () => {
           <Cake isAnimated={isPartyMode} />
         </div>
 
-        {/* Party button */}
-        <div className="flex justify-center">
+        {/* Party button - Multiple test versions */}
+        <div className="flex flex-col items-center space-y-4">
+          {/* Main button */}
           <Button
             onClick={startParty}
-            disabled={isPartyMode}
             size="lg"
-            className={`party-button text-2xl px-12 py-6 rounded-full hover:scale-105 transform transition-all duration-300 shadow-2xl ${
-              isPartyMode ? 'opacity-75 cursor-not-allowed' : ''
-            }`}
+            className="party-button text-2xl px-12 py-6 rounded-full hover:scale-105 transform transition-all duration-300 shadow-2xl"
           >
             <Gift className="mr-3 h-8 w-8" />
             {isPartyMode ? "🎉 庆祝中..." : "开始庆祝！🎵"}
             <Music className="ml-3 h-8 w-8" />
           </Button>
+
+          {/* Test button with direct state change */}
+          <button
+            onClick={() => {
+              console.log('🧪 TEST BUTTON CLICKED');
+              setIsPartyMode(true);
+              setShowConfetti(true);
+              setShowMusicPlayer(true);
+              setShowBarrage(true);
+            }}
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+          >
+            🧪 测试按钮 (直接设置状态)
+          </button>
+
+          {/* Simple state toggle for testing */}
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setShowConfetti(!showConfetti)}
+              className="bg-blue-500 text-white px-3 py-1 rounded text-sm"
+            >
+              🎊 切换礼花: {showConfetti ? 'ON' : 'OFF'}
+            </button>
+            <button
+              onClick={() => setShowBarrage(!showBarrage)}
+              className="bg-green-500 text-white px-3 py-1 rounded text-sm"
+            >
+              💬 切换弹幕: {showBarrage ? 'ON' : 'OFF'}
+            </button>
+            <button
+              onClick={() => setShowMusicPlayer(!showMusicPlayer)}
+              className="bg-purple-500 text-white px-3 py-1 rounded text-sm"
+            >
+              🎵 切换音乐: {showMusicPlayer ? 'ON' : 'OFF'}
+            </button>
+          </div>
         </div>
 
-        {/* Birthday message */}
+        {/* Status display */}
         <div className="mt-8 p-6 bg-white/20 backdrop-blur-md rounded-3xl border border-white/30 shadow-xl">
-          <p className="text-xl md:text-2xl text-foreground/80 leading-relaxed">
-            🌟 愿你的特别日子充满快乐、欢声笑语和所有你喜欢的事物！🌟
-          </p>
-          <div className="flex justify-center space-x-4 mt-4 text-3xl">
-            <span className="animate-bounce-custom" style={{animationDelay: '0s'}}>🎂</span>
-            <span className="animate-bounce-custom" style={{animationDelay: '0.2s'}}>🎈</span>
-            <span className="animate-bounce-custom" style={{animationDelay: '0.4s'}}>🎁</span>
-            <span className="animate-bounce-custom" style={{animationDelay: '0.6s'}}>🎉</span>
-            <span className="animate-bounce-custom" style={{animationDelay: '0.8s'}}>✨</span>
+          <h3 className="text-xl font-bold mb-4">🔍 当前状态</h3>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>庆祝模式: {isPartyMode ? '🟢 开启' : '🔴 关闭'}</div>
+            <div>礼花效果: {showConfetti ? '🟢 显示' : '🔴 隐藏'}</div>
+            <div>音乐播放器: {showMusicPlayer ? '🟢 显示' : '🔴 隐藏'}</div>
+            <div>弹幕系统: {showBarrage ? '🟢 开启' : '🔴 关闭'}</div>
+            <div>歌词显示: {showLyrics ? '🟢 显示' : '🔴 隐藏'}</div>
+            <div>音乐播放: {isPlaying ? '🟢 播放中' : '🔴 已暂停'}</div>
           </div>
         </div>
-
-        {/* Feature info */}
-        {!showMusicPlayer && (
-          <div className="mt-6 space-y-3">
-            <div className="p-4 bg-party-pink/20 backdrop-blur-md rounded-2xl border border-party-pink/30">
-              <p className="text-lg text-party-pink font-semibold">
-                🎵 点击"开始庆祝"解锁全部功能！🎵
-              </p>
-            </div>
-            <div className="grid md:grid-cols-4 gap-4 text-sm">
-              <div className="p-3 bg-party-blue/20 backdrop-blur-md rounded-xl border border-party-blue/30">
-                <p className="text-party-blue font-medium">🎶 生日快乐歌</p>
-              </div>
-              <div className="p-3 bg-party-purple/20 backdrop-blur-md rounded-xl border border-party-purple/30">
-                <p className="text-party-purple font-medium">📺 同步字幕</p>
-              </div>
-              <div className="p-3 bg-party-green/20 backdrop-blur-md rounded-xl border border-party-green/30">
-                <p className="text-party-green font-medium">💬 祝福弹幕</p>
-              </div>
-              <div className="p-3 bg-party-yellow/20 backdrop-blur-md rounded-xl border border-party-yellow/30">
-                <p className="text-party-yellow font-medium">🎈 声效气球</p>
-              </div>
-            </div>
-            <div className="p-3 bg-party-orange/20 backdrop-blur-md rounded-xl border border-party-orange/30">
-              <p className="text-party-orange font-medium text-sm flex items-center justify-center">
-                <Volume2 className="h-4 w-4 mr-2" />
-                💡 小贴士：点击屏幕上的彩色气球享受音效体验！
-              </p>
-            </div>
-          </div>
-        )}
-
-        {showBarrage && hasVisibleBalloons && (
-          <div className="mt-6 p-4 bg-party-orange/20 backdrop-blur-md rounded-2xl border border-party-orange/30">
-            <p className="text-lg text-party-orange font-semibold flex items-center justify-center">
-              <Volume2 className="h-5 w-5 mr-2" />
-              🎈 点击气球听音效！💬 朋友们的祝福正在飞过屏幕！
-            </p>
-          </div>
-        )}
-
-        {!hasVisibleBalloons && showBarrage && (
-          <div className="mt-6 p-4 bg-party-pink/20 backdrop-blur-md rounded-2xl border border-party-pink/30">
-            <p className="text-lg text-party-pink font-semibold">
-              🎊 所有气球都飞走了！🎵 总共听到了 {balloonsPopped} 个音效！
-            </p>
-            <p className="text-sm text-party-pink/80 mt-2">
-              点击左上角按钮重新放置气球继续玩！
-            </p>
-          </div>
-        )}
       </div>
 
       {/* Bottom decoration */}
