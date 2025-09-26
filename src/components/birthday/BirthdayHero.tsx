@@ -12,18 +12,18 @@ interface BalloonState {
   id: string;
   color: 'pink' | 'blue' | 'yellow' | 'purple' | 'green' | 'orange';
   size: 'sm' | 'md' | 'lg';
-  position: { top: string; left: string; right?: string; bottom?: string };
+  position: { top?: string; left?: string; right?: string; bottom?: string };
   animationDelay: string;
   isVisible: boolean;
 }
 
 const initialBalloons: BalloonState[] = [
-  { id: 'balloon-1', color: 'pink', size: 'lg', position: { top: '20%', left: '10%' }, animationDelay: '0s', isVisible: true },
-  { id: 'balloon-2', color: 'blue', size: 'md', position: { top: '32%', right: '20%' }, animationDelay: '1s', isVisible: true },
-  { id: 'balloon-3', color: 'yellow', size: 'lg', position: { bottom: '40%', left: '20%' }, animationDelay: '2s', isVisible: true },
-  { id: 'balloon-4', color: 'purple', size: 'md', position: { bottom: '20%', right: '10%' }, animationDelay: '0.5s', isVisible: true },
-  { id: 'balloon-5', color: 'green', size: 'sm', position: { top: '50%', left: '33%' }, animationDelay: '1.5s', isVisible: true },
-  { id: 'balloon-6', color: 'orange', size: 'md', position: { top: '33%', right: '33%' }, animationDelay: '2.5s', isVisible: true },
+  { id: 'balloon-1', color: 'pink', size: 'lg', position: { top: '15%', left: '8%' }, animationDelay: '0s', isVisible: true },
+  { id: 'balloon-2', color: 'blue', size: 'md', position: { top: '25%', right: '15%' }, animationDelay: '1s', isVisible: true },
+  { id: 'balloon-3', color: 'yellow', size: 'lg', position: { bottom: '35%', left: '12%' }, animationDelay: '2s', isVisible: true },
+  { id: 'balloon-4', color: 'purple', size: 'md', position: { bottom: '15%', right: '8%' }, animationDelay: '0.5s', isVisible: true },
+  { id: 'balloon-5', color: 'green', size: 'sm', position: { top: '45%', left: '25%' }, animationDelay: '1.5s', isVisible: true },
+  { id: 'balloon-6', color: 'orange', size: 'md', position: { top: '30%', right: '25%' }, animationDelay: '2.5s', isVisible: true },
 ];
 
 export const BirthdayHero = () => {
@@ -60,26 +60,35 @@ export const BirthdayHero = () => {
   };
 
   const handleBalloonFlyAway = (balloonId: string) => {
-    setBalloons(prev => 
-      prev.map(balloon => 
+    console.log('Handling balloon fly away:', balloonId); // Debug log
+    setBalloons(prev => {
+      const newBalloons = prev.map(balloon => 
         balloon.id === balloonId 
           ? { ...balloon, isVisible: false }
           : balloon
-      )
-    );
+      );
+      console.log('Updated balloons:', newBalloons); // Debug log
+      return newBalloons;
+    });
   };
 
   const resetBalloons = () => {
-    setBalloons(initialBalloons);
+    console.log('Resetting balloons'); // Debug log
+    setBalloons(initialBalloons.map(balloon => ({ ...balloon, isVisible: true })));
   };
 
   const visibleBalloons = balloons.filter(balloon => balloon.isVisible);
   const hasVisibleBalloons = visibleBalloons.length > 0;
 
+  // Debug effect
+  useEffect(() => {
+    console.log('Visible balloons count:', visibleBalloons.length);
+  }, [visibleBalloons.length]);
+
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-4">
       {/* Background balloons */}
-      <div className="absolute inset-0 pointer-events-auto">
+      <div className="absolute inset-0 z-20">
         {balloons.map((balloon) => (
           balloon.isVisible && (
             <Balloon 
@@ -89,7 +98,8 @@ export const BirthdayHero = () => {
               className="absolute animate-float" 
               style={{
                 ...balloon.position,
-                animationDelay: balloon.animationDelay
+                animationDelay: balloon.animationDelay,
+                zIndex: 25
               }}
               onFlyAway={() => handleBalloonFlyAway(balloon.id)}
             />
@@ -113,18 +123,18 @@ export const BirthdayHero = () => {
       )}
 
       {/* Balloon counter */}
-      <div className="fixed top-20 left-4 z-40">
-        <div className="bg-white/20 backdrop-blur-md rounded-2xl p-3 border border-white/30 shadow-xl">
-          <p className="text-sm font-semibold gradient-text">
-            🎈 剩余气球: {visibleBalloons.length}/6
-          </p>
-          {hasVisibleBalloons && (
+      {hasVisibleBalloons && (
+        <div className="fixed top-4 left-4 z-40">
+          <div className="bg-white/20 backdrop-blur-md rounded-2xl p-3 border border-white/30 shadow-xl">
+            <p className="text-sm font-semibold gradient-text">
+              🎈 剩余气球: {visibleBalloons.length}/6
+            </p>
             <p className="text-xs text-foreground/70 mt-1">
               点击气球放飞它们！
             </p>
-          )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Confetti */}
       {showConfetti && <Confetti />}
@@ -234,7 +244,7 @@ export const BirthdayHero = () => {
             </div>
             <div className="p-3 bg-party-orange/20 backdrop-blur-md rounded-xl border border-party-orange/30">
               <p className="text-party-orange font-medium text-sm">
-                💡 小贴士：点击屏幕上的气球可以放飞它们！
+                💡 小贴士：点击屏幕上的彩色气球可以放飞它们！
               </p>
             </div>
           </div>
